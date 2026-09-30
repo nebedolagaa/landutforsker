@@ -2,9 +2,7 @@
 
 A small web app for exploring countries of the world, built with SvelteKit and the [REST Countries API](https://restcountries.com/).
 
-This was my take-home task for the technical interview at **SmartGIS** in autumn 2025. It was part of the interview process, and in the end I got the job 🙂 So this project means a lot to me, even though it's small.
-
-The app is in Norwegian ("landutforsker" means "country explorer"), since that was the language of the task.
+This was my take home task for the technical interview at [**SmartGIS** ](https://www.smartgis.no/) in autumn 2025. It was part of the interview process, and in the end I got the job :) So this project means a lot to me, even though it's small.
 
 ![Country list](docs/screenshots/list.jpg)
 
@@ -55,22 +53,7 @@ Here I searched for "land" and filtered on Europe.
 - TypeScript
 - Vite
 - REST Countries API
-- Plain CSS, no UI library
-
-## Update in 2026
-
-When I opened the project again a year later to put it on GitHub, it didn't work anymore. REST Countries had shut down the old v3.1 API that I used, and the new v5 API needs an API key and has a different response format.
-
-So I updated it:
-
-- The server routes now use the v5 API with an API key from `.env`. The key is only used on the server
-- The v5 response is converted to the same `Country` type as before, so the pages didn't need to change much
-- Country codes are validated before calling the API, and error messages from the server don't leak internal details
-- Results are cached on the server for 10 minutes, so the app doesn't hit the rate limit
-- Fixed some small bugs: pagination didn't go back to page 1 when you changed the search or filter, flags were cropped, the page was a bit wider than the screen on mobile, and the favicon was missing
-- Updated all dependencies to the latest versions (Svelte 5, SvelteKit 2, Vite 8)
-
-The very first commit in this repo is the code exactly as I handed it in, if you want to compare.
+- Plain CSS
 
 ## How to run it
 
