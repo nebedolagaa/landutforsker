@@ -6,6 +6,8 @@ This was my take-home task for the technical interview at **SmartGIS** in autumn
 
 The app is in Norwegian ("landutforsker" means "country explorer"), since that was the language of the task.
 
+![Country list](docs/screenshots/list.jpg)
+
 ## The task
 
 The task was to make an app that fetches country data from REST Countries and shows it in a nice way. The requirements were:
@@ -28,6 +30,25 @@ The task was to make an app that fetches country data from REST Countries and sh
 
 The browser never talks to REST Countries directly. It calls my own API routes in SvelteKit (`/api/countries` and `/api/countries/[code]`), and those call REST Countries on the server. That way the API key stays on the server and I can choose which fields to send to the browser.
 
+## Screenshots
+
+### Search and filter
+Here I searched for "land" and filtered on Europe.
+
+![Search and filter](docs/screenshots/search.jpg)
+
+### Country page
+
+![Country page](docs/screenshots/detail.jpg)
+
+### Mobile
+
+<p align="center">
+  <img src="docs/screenshots/mobile_list.jpg" width="35%" alt="Country list on mobile">
+  &nbsp;
+  <img src="docs/screenshots/mobile_detail.jpg" width="35%" alt="Country page on mobile">
+</p>
+
 ## Tech used
 
 - [SvelteKit](https://svelte.dev/docs/kit) and Svelte
@@ -46,7 +67,7 @@ So I updated it:
 - The v5 response is converted to the same `Country` type as before, so the pages didn't need to change much
 - Country codes are validated before calling the API, and error messages from the server don't leak internal details
 - Results are cached on the server for 10 minutes, so the app doesn't hit the rate limit
-- Fixed some small bugs: pagination didn't go back to page 1 when you changed the search or filter, flags were cropped, and the favicon was missing
+- Fixed some small bugs: pagination didn't go back to page 1 when you changed the search or filter, flags were cropped, the page was a bit wider than the screen on mobile, and the favicon was missing
 - Updated all dependencies to the latest versions (Svelte 5, SvelteKit 2, Vite 8)
 
 The very first commit in this repo is the code exactly as I handed it in, if you want to compare.

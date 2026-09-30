@@ -32,6 +32,11 @@
 </footer>
 
 <style>
+	/* ellers blir .wrap (width: 100% + padding) bredere enn skjermen på mobil */
+	:global(*, *::before, *::after) {
+		box-sizing: border-box;
+	}
+
 	:global(html, body) {
 		padding: 0;
 		margin: 0;
