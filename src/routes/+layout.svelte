@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 </script>
 
 <svelte:head>
@@ -14,6 +14,11 @@
 		</nav>
 	</div>
 </header>
+
+<!-- Vises mens neste side henter data (load kjører før siden vises) -->
+{#if $navigating}
+	<div class="progress" aria-label="Laster"></div>
+{/if}
 
 <main class="wrap main">
 	<slot />
@@ -73,7 +78,7 @@
 
 	.main {
 		padding: 50px 12px 24px;
-		min-height: calc(100vh - 56px - 60px);
+		min-height: calc(100vh - 70px - 48px);
 	}
 
 	.footer {
@@ -87,13 +92,34 @@
 		color: #ffffff;
 	}
 
+	.progress {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 3px;
+		width: 100%;
+		background: linear-gradient(90deg, transparent, #4da3ff, transparent);
+		background-size: 50% 100%;
+		background-repeat: no-repeat;
+		animation: loading 1s linear infinite;
+		z-index: 10;
+	}
+
+	@keyframes loading {
+		from {
+			background-position: -50% 0;
+		}
+		to {
+			background-position: 150% 0;
+		}
+	}
+
 	.small {
 		font-size: 0.9rem;
 	}
   
 	@media (max-width: 800px) {
 		.main {
-			grid-template-columns: 1fr;
 			max-width: 93%;
 		}
 		.nav a {

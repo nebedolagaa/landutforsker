@@ -6,11 +6,11 @@
 	$: country = data.country;
 
 	function formatPopulation(population: number): string {
-		return population.toLocaleString();
+		return population.toLocaleString('nb-NO');
 	}
 
 	function formatArea(area: number | undefined): string {
-    return area ? area.toLocaleString() + ' km²' : 'Ukjent';
+    return area ? area.toLocaleString('nb-NO') + ' km²' : 'Ukjent';
 	}
 
 	function getCurrencyString(
@@ -18,7 +18,7 @@
 	): string {
     if (!currencies) return 'Ingen';
 		return Object.values(currencies)
-			.map((c) => `${c.name} (${c.symbol})`)
+			.map((c) => (c.symbol ? `${c.name} (${c.symbol})` : c.name))
 			.join(', ');
 	}
 
@@ -36,8 +36,9 @@
 		nativeName: { [key: string]: { official: string; common: string } } | undefined
 	): string {
     if (!nativeName) return 'Ukjent';
-		const names = Object.values(nativeName).map((n) => n.common);
-		return names.join(', ');
+		// Flere språk har ofte samme navn, så vi fjerner duplikater
+		const names = new Set(Object.values(nativeName).map((n) => n.common));
+		return Array.from(names).join(', ');
 	}
 </script>
 
@@ -144,8 +145,12 @@
           <div class="col">
             <div class="label">Kart:</div>
             <div class="actions">
-              <a class="btn" href={country?.maps?.googleMaps} target="_blank" rel="noopener noreferrer">Åpne i Google Maps</a>
-              <a class="btn ghost" href={country?.maps?.openStreetMaps} target="_blank" rel="noopener noreferrer">Åpne i OpenStreetMap</a>
+              {#if country.maps.googleMaps}
+                <a class="btn" href={country.maps.googleMaps} target="_blank" rel="noopener noreferrer">Åpne i Google Maps</a>
+              {/if}
+              {#if country.maps.openStreetMaps}
+                <a class="btn ghost" href={country.maps.openStreetMaps} target="_blank" rel="noopener noreferrer">Åpne i OpenStreetMap</a>
+              {/if}
             </div>
           </div>
         </div>
@@ -184,11 +189,19 @@
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
   }
 
+  .flag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: #f1f5f9;
+  }
+
+  /* contain i stedet for cover, ellers blir flagget kuttet */
   .flag img {
     width: 100%;
-    height: 100%;
-    min-height: 260px;
-    object-fit: cover;
+    max-height: 320px;
+    object-fit: contain;
     display: block;
   }
     

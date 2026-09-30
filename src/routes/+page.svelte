@@ -14,12 +14,8 @@
 	$: regions = getUniqueRegions(allCountries ?? []);
 	$: filteredCountries = filterCountries(allCountries ?? [], searchTerm, selectedRegion);
 	$: totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
-	$: {
-		// Tilbakestill til side 1 når filtrene endres
-		if (currentPage > totalPages && totalPages > 0) {
-			currentPage = 1;
-		}
-	}
+	// Tilbakestill til side 1 når søk, region eller antall per side endres
+	$: searchTerm, selectedRegion, itemsPerPage, (currentPage = 1);
 	$: paginatedCountries = (filteredCountries ?? []).slice(
 		(currentPage - 1) * itemsPerPage,
 		currentPage * itemsPerPage
@@ -41,7 +37,7 @@
 	}
 
 	function formatPopulation(population: number): string {
-		return population.toLocaleString();
+		return population.toLocaleString('nb-NO');
 	}
 </script>
 
@@ -49,6 +45,13 @@
   <h1>Utforsk land</h1>
   <p class="hint">Her kan du se {allCountries.length} land.</p>
 </section>
+
+{#if data.error}
+  <div class="error">
+    <strong>Kunne ikke laste land.</strong>
+    <div>{data.error}</div>
+  </div>
+{/if}
 
 <!-- Søk og filter -->
 <section class="panel">
@@ -83,12 +86,12 @@
   - {Math.min(currentPage * itemsPerPage, filteredCountries.length)} av {filteredCountries.length} land
 </p>
 
-{#if paginatedCountries.length === 0}
+{#if paginatedCountries.length === 0 && !data.error}
   <div class="empty">
     <strong>Ingen land funnet.</strong>
     <div>Prøv å endre søket eller filteret.</div>
   </div>
-{:else}
+{:else if paginatedCountries.length > 0}
   <div class="grid">
     {#each safeCountries as country, i (country?.code ?? i)}
       <a class="card" href="/country/{country?.code}" data-sveltekit-preload-data="off">
@@ -105,13 +108,13 @@
 
   {#if totalPages > 1}
     <div class="pager">
-      <button on:click={() => goToPage(1)} disabled={currentPage === 1}>&laquo;&laquo;</button>
-      <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>&laquo;</button>
+      <button on:click={() => goToPage(1)} disabled={currentPage === 1} aria-label="Første side">&laquo;&laquo;</button>
+      <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} aria-label="Forrige side">&laquo;</button>
       {#each pageNumbers.filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2) as page}
         <button class:active={currentPage === page} on:click={() => goToPage(page)}>{page}</button>
       {/each}
-      <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>&raquo;</button>
-      <button on:click={() => goToPage(totalPages)} disabled={currentPage === totalPages}>&raquo;&raquo;</button>
+      <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} aria-label="Neste side">&raquo;</button>
+      <button on:click={() => goToPage(totalPages)} disabled={currentPage === totalPages} aria-label="Siste side">&raquo;&raquo;</button>
     </div>
   {/if}
 {/if}
@@ -207,7 +210,10 @@
   .card img {
     width: 36%;
     height: 120px;
-    object-fit: cover;
+    object-fit: contain;
+    background: #f1f5f9;
+    padding: 6px;
+    box-sizing: border-box;
   }
 
   .card .body {
@@ -263,6 +269,15 @@
     background: #00263e;
     color: white;
     border-color: #00263e;
+  }
+
+  .error {
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
   }
 
   .empty {

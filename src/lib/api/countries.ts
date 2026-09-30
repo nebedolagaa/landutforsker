@@ -3,49 +3,36 @@ import type { Country, CountryListItem } from "../types/country";
 const LOCAL_API = "/api/countries";
 
 
-// Henter alle land fra REST Countries API
+// Feil fra vårt eget API, med statuskode slik at sidene kan vise riktig melding
+export class CountryApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+async function getJson<T>(url: string, customFetch: typeof fetch): Promise<T> {
+  const response = await customFetch(url);
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new CountryApiError(response.status, body?.message || 'Noe gikk galt ved henting av data');
+  }
+  return response.json();
+}
+
+
+// Henter alle land via vårt lokale API-endepunkt (som snakker med REST Countries på serveren)
 
 export async function fetchAllCountries(customFetch = fetch): Promise<Country[]> {
-  try {
-  // Bruk vårt lokale API-endepunkt som videresender til REST Countries med riktige headere
-    const url = `${LOCAL_API}`;
-    // Henter data fra URL
-    const response = await customFetch(url);
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Klarte ikke å hente land: ${response.status} ${response.statusText}`);
-    }
-    const data: Country[] = await response.json();
-    return data;
-  } catch (error) {
-  console.error("Feil ved henting av land:", error);
-  throw error;
-  }
+  const data = await getJson<Country[]>(LOCAL_API, customFetch);
+  return Array.isArray(data) ? data : [];
 }
 
 
 //  Henter ett land basert på landkode (cca2 eller cca3)
 
 export async function fetchCountryByCode(code: string, customFetch = fetch): Promise<Country> {
-  try {
-  // Bruker lokale API-endepunkt for å hente ett land
-    const codeSafe = (code || '').trim();
-    const url = `${LOCAL_API}/${codeSafe}`;
-    const response = await customFetch(url);
-    if (!response.ok) {
-      throw new Error(`Klarte ikke å hente landet: ${response.status} ${response.statusText}`);
-    }
-    const data: unknown = await response.json();
-  // Lokalt proxy returnerer et enkelt objekt; håndter array hvis det skulle oppstå
-    const item = Array.isArray(data) ? data[0] : data;
-    if (!item) {
-      throw new Error(`Fant ikke land for kode '${code}'`);
-    }
-    return item as Country;
-  } catch (error) {
-  console.error("Feil ved henting av land:", error);
-  throw error;
-  }
+  const codeSafe = encodeURIComponent((code || '').trim());
+  return getJson<Country>(`${LOCAL_API}/${codeSafe}`, customFetch);
 }
 
 
@@ -59,7 +46,7 @@ export function toCountryListItem(country: Country): CountryListItem {
     code: country?.cca3 || country?.cca2 || name,
     flag,
     population: country?.population ?? 0,
-  region: country?.region || 'Ukjent',
+    region: country?.region || 'Ukjent',
     capital: country?.capital?.[0],
   };
 }

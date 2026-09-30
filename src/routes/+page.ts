@@ -1,12 +1,11 @@
 import type { PageLoad } from "./$types";
-import { fetchAllCountries, toCountryListItem } from "$lib/api/countries";
+import { CountryApiError, fetchAllCountries, toCountryListItem } from "$lib/api/countries";
 import type { CountryListItem } from "$lib/types/country";
 
-export const ssr = false; // jeg kjører alt i nettleser for enkelhet
+export const ssr = false; // jeg kjører alt i nettleseren for enkelhets skyld
 
 export const load: PageLoad = async ({ fetch }) => {
   try {
-    console.log('Laster land...');
     const countries = await fetchAllCountries(fetch);
     const countryList: CountryListItem[] = (Array.isArray(countries) ? countries : [])
       .map((c) => {
@@ -21,9 +20,10 @@ export const load: PageLoad = async ({ fetch }) => {
 
     countryList.sort((a, b) => a.name.localeCompare(b.name));
 
-    return { countries: countryList };
+    return { countries: countryList, error: null };
   } catch (error) {
     console.error("Feil ved lasting av land:", error);
-    return { countries: [] };
+    const message = error instanceof CountryApiError ? error.message : 'Kunne ikke laste land';
+    return { countries: [] as CountryListItem[], error: message };
   }
 };
